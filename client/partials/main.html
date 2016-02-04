@@ -1,8 +1,8 @@
 <div ng-controller='tasksController as tskCtrl'>
 
-	<h2>Welcome <span ng-bind='tskCtrl.sessionUser'></span>!</h2>
+	<h2>Welcome, <span ng-bind='tskCtrl.sessionUser'></span>!</h2>
 
-	<h3> There are <span ng-bind ='tskCtrl.length'></span></h3>
+	<h4> There are <span ng-bind ='tskCtrl.tasks.length'></span> tasks available <i class="fa fa-check-square-o"></i></h4>
 
 
 	<table class="table table-hover table-bordered">
@@ -21,7 +21,7 @@
 	      <td><a href='#/show/{{task._id}}' ng-bind='task.task'></a></td>
 	      <td ng-bind='task.deadline | date: "mediumDate"'></td>
 	      <td><button ng-click='tskCtrl.like(task._id)' 
-	      ng-bind='task.likes'>0</button></td>
+	      ng-bind='task.likes'>0 </button> <i class ="fa fa-thumbs-up"></i></td>
 
 	      <td><a href='' ng-click='tskCtrl.deleteTask(task._id)'>Yes</a></td>
 	    </tr>
