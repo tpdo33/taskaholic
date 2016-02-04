@@ -1,0 +1,9 @@
+{
+  "name": "discussion_board",
+  "description": "forum template run on sockets",
+  "dependencies": {
+    "body-parser": "latest",
+    "express": "latest",
+    "mongoose": "latest"
+  }
+}

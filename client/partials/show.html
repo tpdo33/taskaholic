@@ -1,0 +1,9 @@
+<div ng-controller='showTaskController as sTkCtrl'>
+	<h2 ng-bind='sTkCtrl.taskInfo.task'></h2>
+	<h4>Task created by <span ng-bind='sTkCtrl.taskInfo.user'></span></h4>
+	<p><strong>Deadline:</strong> <span ng-bind='sTkCtrl.taskInfo.deadline | date:"mediumDate"'></span></p>
+	<p><strong>Create Date: </strong><span ng-bind='sTkCtrl.taskInfo.created_at | date:"mediumDate"'></span></p>
+
+	<p>This task has received <span ng-bind='sTkCtrl.taskInfo.likes'></span> likes!</p>
+
+</div>

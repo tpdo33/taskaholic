@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html ng-app='app'>
+
+<head>
+
+	<meta charset="utf-8">
+	<link rel="stylesheet" type='text/css' href='/css/bootstrap.css'>
+
+	<title>Taskaholic</title>
+
+	<style>
+
+	body {
+	 	padding-top: 60px;
+	}
+
+	</style>
+
+</head>
+
+<body>
+
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#/main">Task-aholic</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="#/addtask">Add Task</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+	<div class="container" ng-view=""></div>
+
+	<!-- Load Libraries -->
+	<script src="/js/libraries/jquery-2.1.4.min.js"></script>
+	<script src="/js/libraries/angular-1.4.7.min.js"></script>
+	<script src="/js/libraries/angular-route.min.js"></script>
+ 	<script src="/js/libraries/bootstrap.min.js"></script>
+
+  	<script>
+
+		var app = angular.module('app', ['ngRoute']); 
+
+		app.config(function ($routeProvider) {
+		  $routeProvider
+		  	.when('/', {
+		  		templateUrl: 'partials/login.html'	
+		  	})
+		    .when('/main', {
+		        templateUrl: 'partials/main.html'
+		    })
+		    .when('/addtask',{
+		        templateUrl: 'partials/addTask.html'
+		    })
+		    .when('/show/:id', {
+		    	templateUrl: 'partials/show.html'
+		    })
+		    .otherwise({
+		      redirectTo: '/'
+		    });
+		});
+
+		app.controller('loginController', function(userFactory, $location){
+			var _this = this;
+
+			_this.login = function(){
+				userFactory.login(_this.username, function(user){
+					_this.user = user;
+					$location.path('/main');
+				});
+			}
+
+		})
+
+		app.factory('userFactory', function($http){
+			var factory = {}
+
+			factory.user = {}
+
+			factory.login = function(newUser, callback){
+				$http.post('/addUser', newUser).success(function(user){
+					factory.user = user;
+					callback(user);
+				})
+			}
+
+			factory.check = function(callback){
+					callback(factory.user);
+			}
+
+			return factory;
+
+		});
+
+
+		app.controller('addTaskController', function(taskFactory, userFactory, $location){
+			var _this = this;
+
+			userFactory.check(function(user){
+				if(!Object.keys(user).length){
+					$location.path('/')
+				}
+			}) 
+
+			_this.addTask = function(){
+				_this.task.user = userFactory.user;
+				taskFactory.addTask(_this.task, function(task){
+					if(task.error != undefined){
+						_this.errors = task;
+					} else {
+						$location.path('/main');
+					}
+				})
+			}
+
+		})
+
+		app.factory('taskFactory', function($http){
+			var factory = {}
+
+			factory.addTask = function(task, callback){
+				$http.post('/addTask', task).success(function(task){
+					callback(task);
+				});
+			};
+
+			factory.allTask = function(callback){
+				$http.get('/getAll').success(function(tasks){
+					callback(tasks);
+				})
+			}
+
+			factory.deleteTask = function(taskid, callback){
+				$http.delete('/deleteTask/' + taskid).success(function(){
+					$http.get('/getAll').success(function(tasks){
+						callback(tasks);
+					})
+				});
+			};
+
+			factory.likeTask = function(taskid, callback){
+				$http.put('/likeTask/' + taskid).success(function(){
+					$http.get('/getAll').success(function(tasks){
+						callback(tasks);
+					})
+				});
+			};
+
+			factory.getOne = function(taskid, callback){
+				$http.get('/getTask/' + taskid).success(function(task){
+					callback(task);
+				})
+			}
+
+			return factory;
+		});
+
+		app.controller('tasksController', function(taskFactory, userFactory, $location){
+			var _this = this;
+
+			userFactory.check(function(user){
+				if(!Object.keys(user).length){
+					$location.path('/')
+				} else {
+					_this.sessionUser = user.name;
+				}
+			}) 
+
+			taskFactory.allTask(function(tasks){
+				_this.tasks = tasks;
+			});
+			
+			_this.deleteTask = function(taskid){
+				taskFactory.deleteTask(taskid, function(tasks){
+					_this.tasks = tasks;
+				});
+			}
+
+			_this.like = function(taskid){
+				taskFactory.likeTask(taskid, function(tasks){
+					_this.tasks = tasks;
+				})
+			}
+
+		})
+
+		app.controller('showTaskController', function($routeParams, $location, taskFactory, userFactory){
+			var _this = this;
+			
+			userFactory.check(function(user){
+				if(!Object.keys(user).length){
+					$location.path('/')
+				} else {
+					_this.sessionUser = user.name;
+				}
+			}) 
+
+			taskFactory.getOne($routeParams.id, function(task){
+				_this.taskInfo = task;
+				console.log(_this.taskInfo);
+			});
+
+		});
+
+  	</script>			
+	
+</body>
+
+</html>
